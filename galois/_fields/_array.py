@@ -364,7 +364,7 @@ class FieldArray(np.ndarray, metaclass=FieldClass):
         return array.view(cls)
 
     @classmethod
-    def Random(cls, shape=(), low=0, high=None, dtype=None):
+    def Random(cls, shape=(), low=0, high=None, dtype=None, seed=None):
         """
         Creates a Galois field array with random field elements.
 
@@ -382,6 +382,9 @@ class FieldArray(np.ndarray, metaclass=FieldClass):
         dtype : numpy.dtype, optional
             The :obj:`numpy.dtype` of the array elements. The default is `None` which represents the smallest unsigned
             dtype for this class, i.e. the first element in :obj:`galois.FieldClass.dtypes`.
+        seed: int, optional
+            The seed used to initialize the PRNG. The default is `None` which means that unpredictable entropy
+            will be pulled from the OS to be used as the seed.
 
         Returns
         -------
@@ -401,11 +404,13 @@ class FieldArray(np.ndarray, metaclass=FieldClass):
             raise ValueError(f"Arguments must satisfy `0 <= low < high <= order`, not `0 <= {low} < {high} <= {cls.order}`.")
 
         if dtype != np.object_:
-            array = np.random.randint(low, high, shape, dtype=dtype)
+            rng = np.random.default_rng(seed)
+            array = rng.integers(low, high, shape, dtype=dtype)
         else:
             array = np.empty(shape, dtype=dtype)
             iterator = np.nditer(array, flags=["multi_index", "refs_ok"])
             for _ in iterator:
+                random.seed(seed)
                 array[iterator.multi_index] = random.randint(low, high - 1)
 
         return array.view(cls)

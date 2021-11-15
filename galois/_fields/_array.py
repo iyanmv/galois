@@ -364,7 +364,7 @@ class FieldArray(np.ndarray, metaclass=FieldClass):
         return array.view(cls)
 
     @classmethod
-    def Random(cls, shape=(), low=0, high=None, dtype=None, seed=None):
+    def Random(cls, shape=(), low=0, high=None, seed=None, dtype=None):
         """
         Creates a Galois field array with random field elements.
 
@@ -379,12 +379,12 @@ class FieldArray(np.ndarray, metaclass=FieldClass):
         high : int, optional
             The highest value (exclusive) of a random field element in its integer representation. The default is `None`
             which represents the field's order :math:`p^m`.
-        dtype : numpy.dtype, optional
-            The :obj:`numpy.dtype` of the array elements. The default is `None` which represents the smallest unsigned
-            dtype for this class, i.e. the first element in :obj:`galois.FieldClass.dtypes`.
         seed: int, optional
             The seed used to initialize the PRNG. The default is `None` which means that unpredictable entropy
             will be pulled from the OS to be used as the seed.
+        dtype : numpy.dtype, optional
+            The :obj:`numpy.dtype` of the array elements. The default is `None` which represents the smallest unsigned
+            dtype for this class, i.e. the first element in :obj:`galois.FieldClass.dtypes`.
 
         Returns
         -------

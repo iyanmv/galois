@@ -102,6 +102,23 @@ def test_random(field, shape):
     assert a.shape == shape
 
 
+@pytest.mark.parametrize("seed", [None, 42, 1337, 27182818284])
+def test_random_valid_seed(field, seed):
+    shape = (4, 4)
+    a = field.Random(shape, seed=seed)
+    assert np.all(a >= 0) and np.all(a < field.order)
+    assert type(a) is field
+    assert a.dtype == field.dtypes[0]
+    assert a.shape == shape
+
+
+@pytest.mark.parametrize("seed", ["hi", 3.14, (1, 2, 3)])
+def test_random_invalid_seed(field, seed):
+    shape = (4, 4)
+    with pytest.raises(ValueError):
+        a = field.Random(shape, seed=seed)
+
+
 @pytest.mark.parametrize("shape", [(), (4,), (4,4)])
 def test_random_valid_dtype(field, shape):
     dtype = valid_dtype(field)

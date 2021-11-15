@@ -403,6 +403,9 @@ class FieldArray(np.ndarray, metaclass=FieldClass):
         if not 0 <= low < high <= cls.order:
             raise ValueError(f"Arguments must satisfy `0 <= low < high <= order`, not `0 <= {low} < {high} <= {cls.order}`.")
 
+        if not isinstance(seed, int) and seed is not None:
+            raise ValueError(f"Seed must be an integer or None.")
+
         if dtype != np.object_:
             rng = np.random.default_rng(seed)
             array = rng.integers(low, high, shape, dtype=dtype)

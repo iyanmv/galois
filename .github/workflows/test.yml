@@ -47,7 +47,7 @@ jobs:
     - name: Install python package
       run: python3 -m pip install .
     - name: Test with pytest
-      run: python3 -m pytest --cov=galois/ --cov-report=xml tests/
+      run: python3 -m pytest --cov=galois/ --cov-report=xml tests/polys/test_irreducible_polys.py
     - name: Upload coverage report
       uses: codecov/codecov-action@v1
 
@@ -107,7 +107,7 @@ jobs:
         python3 -m pip install $(ls dist/galois-*.whl)
     - name: Test with pytest
       run: |
-        python3 -m pytest tests/
+        python3 -m pytest tests/polys/test_irreducible_polys.py
 
   test-latest:
     name: Latest Dependencies
@@ -141,4 +141,4 @@ jobs:
         python3 -m pip install $(ls dist/galois-*.whl)
     - name: Test with pytest
       run: |
-        python3 -m pytest tests/
+        python3 -m pytest tests/polys/test_irreducible_polys.py

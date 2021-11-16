@@ -412,8 +412,8 @@ class FieldArray(np.ndarray, metaclass=FieldClass):
         else:
             array = np.empty(shape, dtype=dtype)
             iterator = np.nditer(array, flags=["multi_index", "refs_ok"])
+            random.seed(seed)
             for _ in iterator:
-                random.seed(seed)
                 array[iterator.multi_index] = random.randint(low, high - 1)
 
         return array.view(cls)

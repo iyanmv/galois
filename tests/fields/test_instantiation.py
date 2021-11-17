@@ -12,6 +12,11 @@ from ..helper import array_equal
 
 DTYPES = [np.uint8, np.uint16, np.uint32, np.int8, np.int16, np.int32, np.int64, np.object_]
 
+# GitHub Actions may freeze with this particular module because it consumes too much
+# entropy from the OS pool. By generating an iterator with seeds at the beginning, we only
+# need a single call to default_rng() with seed=None.
+SEEDS = iter(np.random.default_rng().integers(np.iinfo(np.int).max, size=1 << 20, dtype=np.int))
+
 
 def test_cant_instantiate_GF():
     v = [0, 1, 0, 1]
@@ -22,7 +27,7 @@ def test_cant_instantiate_GF():
 class Test0D:
     @pytest.mark.parametrize("type1", [int, list, tuple, np.array, galois.FieldArray])
     def test_new(self, field, type1):
-        v = int(field.Random())
+        v = int(field.Random(seed=next(SEEDS)))
         vt = convert_0d(v, type1, field)
         a = field(vt)
         assert type(a) is field
@@ -30,7 +35,7 @@ class Test0D:
 
     @pytest.mark.parametrize("type1", [int, list, tuple, np.array, galois.FieldArray])
     def test_valid_dtype(self, field, type1):
-        v = int(field.Random())
+        v = int(field.Random(seed=next(SEEDS)))
         vt = convert_0d(v, type1, field)
         dtype = valid_dtype(field)
         a = field(vt, dtype=dtype)
@@ -40,7 +45,7 @@ class Test0D:
 
     @pytest.mark.parametrize("type1", [int, list, tuple, np.array, galois.FieldArray])
     def test_invalid_dtype(self, field, type1):
-        v = int(field.Random())
+        v = int(field.Random(seed=next(SEEDS)))
         vt = convert_0d(v, type1, field)
         dtype = invalid_dtype(field)
         with pytest.raises(TypeError):
@@ -68,7 +73,7 @@ class Test0D:
             a = field(vt)
 
     def test_copy_true(self, field):
-        v = int(field.Random(low=1))
+        v = int(field.Random(low=1, seed=next(SEEDS)))
         va = np.array(v, dtype=field.dtypes[0])
         a = field(va, copy=True)
         assert type(a) is field
@@ -77,7 +82,7 @@ class Test0D:
         assert array_equal(a, v)
 
     def test_default_order_c(self, field):
-        v = int(field.Random())
+        v = int(field.Random(seed=next(SEEDS)))
         va = np.array(v, order="C", dtype=field.dtypes[0])
         a = field(va)  # Default order is "K" which keeps current
         assert type(a) is field
@@ -85,7 +90,7 @@ class Test0D:
         assert a.flags["F_CONTIGUOUS"]
 
     def test_default_order_f(self, field):
-        v = int(field.Random())
+        v = int(field.Random(seed=next(SEEDS)))
         va = np.array(v, order="F", dtype=field.dtypes[0])
         a = field(va)  # Default order is "K" which keeps current
         assert type(a) is field
@@ -93,7 +98,7 @@ class Test0D:
         assert a.flags["F_CONTIGUOUS"]
 
     def test_order_c(self, field):
-        v = int(field.Random())
+        v = int(field.Random(seed=next(SEEDS)))
         va = np.array(v, order="F", dtype=field.dtypes[0])
         a = field(va, order="C")
         assert type(a) is field
@@ -101,7 +106,7 @@ class Test0D:
         assert a.flags["F_CONTIGUOUS"]
 
     def test_order_f(self, field):
-        v = int(field.Random())
+        v = int(field.Random(seed=next(SEEDS)))
         va = np.array(v, order="C", dtype=field.dtypes[0])
         a = field(va, order="F")
         assert type(a) is field
@@ -109,7 +114,7 @@ class Test0D:
         assert a.flags["F_CONTIGUOUS"]
 
     def test_ndmin(self, field):
-        v = int(field.Random())
+        v = int(field.Random(seed=next(SEEDS)))
         a = field(v, ndmin=3)
         assert type(a) is field
         assert a.shape == (1,1,1)
@@ -118,7 +123,7 @@ class Test0D:
 class Test1D:
     @pytest.mark.parametrize("type1", [list, tuple, np.array, galois.FieldArray])
     def test_new(self, field, type1):
-        v = [int(field.Random()), int(field.Random()), int(field.Random()), int(field.Random())]
+        v = [int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))]
         vt = convert_1d(v, type1, field)
         a = field(vt)
         assert type(a) is field
@@ -126,7 +131,7 @@ class Test1D:
 
     @pytest.mark.parametrize("type1", [list, tuple, np.array, galois.FieldArray])
     def test_valid_dtype(self, field, type1):
-        v = [int(field.Random()), int(field.Random()), int(field.Random()), int(field.Random())]
+        v = [int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))]
         vt = convert_1d(v, type1, field)
         dtype = valid_dtype(field)
         a = field(vt, dtype=dtype)
@@ -136,7 +141,7 @@ class Test1D:
 
     @pytest.mark.parametrize("type1", [list, tuple, np.array, galois.FieldArray])
     def test_invalid_dtype(self, field, type1):
-        v = [int(field.Random()), int(field.Random()), int(field.Random()), int(field.Random())]
+        v = [int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))]
         vt = convert_1d(v, type1, field)
         dtype = invalid_dtype(field)
         with pytest.raises(TypeError):
@@ -144,27 +149,27 @@ class Test1D:
 
     @pytest.mark.parametrize("type1", [list, tuple, np.array])
     def test_non_integer(self, field, type1):
-        v = [int(field.Random()), float(field.Random()), int(field.Random()), int(field.Random())]
+        v = [int(field.Random(seed=next(SEEDS))), float(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))]
         vt = convert_1d(v, type1, field)
         with pytest.raises((TypeError, ValueError)):
             a = field(vt)
 
     @pytest.mark.parametrize("type1", [list, tuple, np.array])
     def test_out_of_range_low(self, field, type1):
-        v = [int(field.Random()), -1, int(field.Random()), int(field.Random())]
+        v = [int(field.Random(seed=next(SEEDS))), -1, int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))]
         vt = convert_1d(v, type1, field)
         with pytest.raises(ValueError):
             a = field(vt)
 
     @pytest.mark.parametrize("type1", [list, tuple, np.array])
     def test_out_of_range_high(self, field, type1):
-        v = [int(field.Random()), field.order, int(field.Random()), int(field.Random())]
+        v = [int(field.Random(seed=next(SEEDS))), field.order, int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))]
         vt = convert_1d(v, type1, field)
         with pytest.raises(ValueError):
             a = field(vt)
 
     def test_copy_true(self, field):
-        v = [int(field.Random(low=1)), int(field.Random()), int(field.Random()), int(field.Random())]
+        v = [int(field.Random(low=1, seed=next(SEEDS))), int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))]
         va = np.array(v, dtype=field.dtypes[0])
         a = field(va, copy=True)
         assert type(a) is field
@@ -173,7 +178,7 @@ class Test1D:
         assert array_equal(a, v)
 
     def test_default_order_c(self, field):
-        v = [int(field.Random()), int(field.Random()), int(field.Random()), int(field.Random())]
+        v = [int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))]
         va = np.array(v, order="C", dtype=field.dtypes[0])
         a = field(va)  # Default order is "K" which keeps current
         assert type(a) is field
@@ -181,7 +186,7 @@ class Test1D:
         assert a.flags["F_CONTIGUOUS"]
 
     def test_default_order_f(self, field):
-        v = [int(field.Random()), int(field.Random()), int(field.Random()), int(field.Random())]
+        v = [int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))]
         va = np.array(v, order="F", dtype=field.dtypes[0])
         a = field(va)  # Default order is "K" which keeps current
         assert type(a) is field
@@ -189,7 +194,7 @@ class Test1D:
         assert a.flags["F_CONTIGUOUS"]
 
     def test_order_c(self, field):
-        v = [int(field.Random()), int(field.Random()), int(field.Random()), int(field.Random())]
+        v = [int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))]
         va = np.array(v, order="F", dtype=field.dtypes[0])
         a = field(va, order="C")
         assert type(a) is field
@@ -197,7 +202,7 @@ class Test1D:
         assert a.flags["F_CONTIGUOUS"]
 
     def test_order_f(self, field):
-        v = [int(field.Random()), int(field.Random()), int(field.Random()), int(field.Random())]
+        v = [int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))]
         va = np.array(v, order="C", dtype=field.dtypes[0])
         a = field(va, order="F")
         assert type(a) is field
@@ -205,7 +210,7 @@ class Test1D:
         assert a.flags["F_CONTIGUOUS"]
 
     def test_ndmin(self, field):
-        v = [int(field.Random()), int(field.Random()), int(field.Random()), int(field.Random())]
+        v = [int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))]
         a = field(v, ndmin=3)
         assert type(a) is field
         assert a.shape == (1,1,4)
@@ -214,7 +219,7 @@ class Test1D:
 class Test2D:
     @pytest.mark.parametrize("type1", [list, tuple, np.array, galois.FieldArray])
     def test_new(self, field, type1):
-        v = [[int(field.Random()), int(field.Random())], [int(field.Random()), int(field.Random())]]
+        v = [[int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))], [int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))]]
         vt = convert_2d(v, type1, field)
         a = field(vt)
         assert type(a) is field
@@ -222,7 +227,7 @@ class Test2D:
 
     @pytest.mark.parametrize("type1", [list, tuple, np.array, galois.FieldArray])
     def test_valid_dtype(self, field, type1):
-        v = [[int(field.Random()), int(field.Random())], [int(field.Random()), int(field.Random())]]
+        v = [[int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))], [int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))]]
         vt = convert_2d(v, type1, field)
         dtype = valid_dtype(field)
         a = field(vt, dtype=dtype)
@@ -232,7 +237,7 @@ class Test2D:
 
     @pytest.mark.parametrize("type1", [list, tuple, np.array, galois.FieldArray])
     def test_invalid_dtype(self, field, type1):
-        v = [[int(field.Random()), int(field.Random())], [int(field.Random()), int(field.Random())]]
+        v = [[int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))], [int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))]]
         vt = convert_2d(v, type1, field)
         dtype = invalid_dtype(field)
         with pytest.raises(TypeError):
@@ -240,27 +245,27 @@ class Test2D:
 
     @pytest.mark.parametrize("type1", [list, tuple, np.array])
     def test_non_integer(self, field, type1):
-        v = [[int(field.Random()), float(field.Random())], [int(field.Random()), int(field.Random())]]
+        v = [[int(field.Random(seed=next(SEEDS))), float(field.Random(seed=next(SEEDS)))], [int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))]]
         vt = convert_2d(v, type1, field)
         with pytest.raises((TypeError, ValueError)):
             a = field(vt)
 
     @pytest.mark.parametrize("type1", [list, tuple, np.array])
     def test_out_of_range_low(self, field, type1):
-        v = [[int(field.Random()), -1], [int(field.Random()), int(field.Random())]]
+        v = [[int(field.Random(seed=next(SEEDS))), -1], [int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))]]
         vt = convert_2d(v, type1, field)
         with pytest.raises(ValueError):
             a = field(vt)
 
     @pytest.mark.parametrize("type1", [list, tuple, np.array])
     def test_out_of_range_high(self, field, type1):
-        v = [[int(field.Random()), field.order], [int(field.Random()), int(field.Random())]]
+        v = [[int(field.Random(seed=next(SEEDS))), field.order], [int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))]]
         vt = convert_2d(v, type1, field)
         with pytest.raises(ValueError):
             a = field(vt)
 
     def test_copy_true(self, field):
-        v = [[int(field.Random(low=1)), int(field.Random())], [int(field.Random()), int(field.Random())]]
+        v = [[int(field.Random(low=1, seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))], [int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))]]
         va = np.array(v, dtype=field.dtypes[0])
         a = field(va, copy=True)
         assert type(a) is field
@@ -269,7 +274,7 @@ class Test2D:
         assert array_equal(a, v)
 
     def test_default_order_c(self, field):
-        v = [[int(field.Random()), int(field.Random())], [int(field.Random()), int(field.Random())]]
+        v = [[int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))], [int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))]]
         va = np.array(v, order="C", dtype=field.dtypes[0])
         a = field(va)  # Default order is "K" which keeps current
         assert type(a) is field
@@ -277,7 +282,7 @@ class Test2D:
         assert not a.flags["F_CONTIGUOUS"]
 
     def test_default_order_f(self, field):
-        v = [[int(field.Random()), int(field.Random())], [int(field.Random()), int(field.Random())]]
+        v = [[int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))], [int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))]]
         va = np.array(v, order="F", dtype=field.dtypes[0])
         a = field(va)  # Default order is "K" which keeps current
         assert type(a) is field
@@ -285,7 +290,7 @@ class Test2D:
         assert a.flags["F_CONTIGUOUS"]
 
     def test_order_c(self, field):
-        v = [[int(field.Random()), int(field.Random())], [int(field.Random()), int(field.Random())]]
+        v = [[int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))], [int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))]]
         va = np.array(v, order="F", dtype=field.dtypes[0])
         a = field(va, order="C")
         assert type(a) is field
@@ -293,7 +298,7 @@ class Test2D:
         assert not a.flags["F_CONTIGUOUS"]
 
     def test_order_f(self, field):
-        v = [[int(field.Random()), int(field.Random())], [int(field.Random()), int(field.Random())]]
+        v = [[int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))], [int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))]]
         va = np.array(v, order="C", dtype=field.dtypes[0])
         a = field(va, order="F")
         assert type(a) is field
@@ -301,7 +306,7 @@ class Test2D:
         assert a.flags["F_CONTIGUOUS"]
 
     def test_ndmin(self, field):
-        v = [[int(field.Random()), int(field.Random())], [int(field.Random()), int(field.Random())]]
+        v = [[int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))], [int(field.Random(seed=next(SEEDS))), int(field.Random(seed=next(SEEDS)))]]
         a = field(v, ndmin=3)
         assert type(a) is field
         assert a.shape == (1,2,2)

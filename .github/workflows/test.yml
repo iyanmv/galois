@@ -108,7 +108,7 @@ jobs:
         python3 -m pip install $(ls dist/galois-*.whl)
     - name: Test with pytest
       run: |
-        python3 -m pytest tests/
+        python3 -m pytest -v tests/
 
   test-latest:
     name: Latest Dependencies

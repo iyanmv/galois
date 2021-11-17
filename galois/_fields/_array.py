@@ -380,8 +380,8 @@ class FieldArray(np.ndarray, metaclass=FieldClass):
             The highest value (exclusive) of a random field element in its integer representation. The default is `None`
             which represents the field's order :math:`p^m`.
         seed: int, optional
-            The seed used to initialize the PRNG. The default is `None` which means that unpredictable entropy
-            will be pulled from the OS to be used as the seed.
+            Non-negative integer used to initialize the PRNG. The default is `None` which means that unpredictable
+            entropy will be pulled from the OS to be used as the seed.
         dtype : numpy.dtype, optional
             The :obj:`numpy.dtype` of the array elements. The default is `None` which represents the smallest unsigned
             dtype for this class, i.e. the first element in :obj:`galois.FieldClass.dtypes`.
@@ -403,8 +403,11 @@ class FieldArray(np.ndarray, metaclass=FieldClass):
         if not 0 <= low < high <= cls.order:
             raise ValueError(f"Arguments must satisfy `0 <= low < high <= order`, not `0 <= {low} < {high} <= {cls.order}`.")
 
-        if not isinstance(seed, (int, np.integer)) and seed is not None:
-            raise ValueError("Seed must be an integer or None.")
+        if seed is not None:
+            if not isinstance(seed, (int, np.integer)):
+                raise ValueError("Seed must be an integer or None.")
+            if seed < 0:
+                raise ValueError("Seed must be non-negative.")
 
         if dtype != np.object_:
             rng = np.random.default_rng(seed)

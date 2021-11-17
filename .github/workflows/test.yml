@@ -76,7 +76,7 @@ jobs:
   test-min:
     name: Minimum Dependencies
     needs: build-wheel
-    timeout-minutes: 10
+    timeout-minutes: 20
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]

@@ -14,7 +14,7 @@ from ..helper import array_equal
 # GitHub Actions may freeze with this particular module because it consumes too much
 # entropy from the OS pool. By generating an iterator with seeds at the beginning, we only
 # need a single call to default_rng() with seed=None.
-SEEDS = iter(np.random.default_rng().integers(np.iinfo(np.uint32).max, size=1 << 20, dtype=np.uint32))
+SEEDS = iter(np.random.default_rng().integers(np.iinfo(np.uint32).max, size=1 << 22, dtype=np.uint32))
 
 
 def test_dot_scalar(field):

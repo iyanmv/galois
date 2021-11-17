@@ -2,7 +2,6 @@
 A pytest module to test modular arithmetic functions.
 """
 import math
-import random
 
 import pytest
 

@@ -77,14 +77,17 @@ jobs:
     name: Minimum Dependencies
     needs: build-wheel
     strategy:
-      max-parallel: 1
-      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: [3.6, 3.7, 3.8, 3.9]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
+    - name: Install haveged
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get install haveged
+        sudo systemctl start haveged.service
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
@@ -115,14 +118,17 @@ jobs:
     name: Latest Dependencies
     needs: build-wheel
     strategy:
-      max-parallel: 1
-      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: [3.6, 3.7, 3.8, 3.9]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
+    - name: Install haveged
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get install haveged
+        sudo systemctl start haveged.service
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:

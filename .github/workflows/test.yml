@@ -84,14 +84,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
-    - name: Install rng tools
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        sudo apt-get install -y rng-tools haveged
-        sudo rngd -r /dev/urandom
-        cat /proc/sys/kernel/random/entropy_avail
-        sleep 30
-        cat /proc/sys/kernel/random/entropy_avail
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
@@ -129,14 +121,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
-    - name: Install rng tools
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        sudo apt-get install -y rng-tools haveged
-        sudo rngd -r /dev/urandom
-        cat /proc/sys/kernel/random/entropy_avail
-        sleep 30
-        cat /proc/sys/kernel/random/entropy_avail
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:

@@ -412,6 +412,9 @@ class FieldArray(np.ndarray, metaclass=FieldClass):
         else:
             array = np.empty(shape, dtype=dtype)
             iterator = np.nditer(array, flags=["multi_index", "refs_ok"])
+            if isinstance(seed, np.integer) and seed is not None:
+                # np.integers not supported by random and seeding based on hashing deprecated since Python 3.9
+                seed = seed.item()
             random.seed(seed)
             for _ in iterator:
                 array[iterator.multi_index] = random.randint(low, high - 1)

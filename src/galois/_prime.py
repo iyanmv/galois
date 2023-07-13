@@ -392,6 +392,17 @@ def mersenne_primes(n: int | None = None) -> list[int]:
     Notes:
         Mersenne primes are primes that are one less than a power of 2.
 
+    Warning:
+        Since Python 3.11, `converting between int and str is limited <stdtypes>`_ to numbers with less than 4300 digits.
+        Some of the Mersenne primes are larger than this, so if you want to print them you should disable this limit
+
+        .. ipython:: python
+
+            import sys
+            sys.set_int_max_str_digits(0)
+
+    .. _stdtypes: https://docs.python.org/3/library/stdtypes.html#integer-string-conversion-length-limitation
+
     References:
         - https://oeis.org/A000668
 
@@ -822,13 +833,19 @@ def factors(n: int) -> tuple[list[int], list[int]]:
     except LookupError:
         p, e = [], []
 
-    # Step 1: Test is n is prime.
+    # Step 1: Check if n is a Mersenne prime
+    if n in mersenne_primes():
+        p.append(n)
+        e.append(1)
+        return p, e
+
+    # Step 2: Test if n is prime.
     if is_prime(n):
         p.append(n)
         e.append(1)
         return p, e
 
-    # Step 2: Test if n is a perfect power. The base may be composite.
+    # Step 3: Test if n is a perfect power. The base may be composite.
     base, exponent = perfect_power(n)
     if base != n:
         pp, ee = factors(base)
@@ -837,12 +854,12 @@ def factors(n: int) -> tuple[list[int], list[int]]:
         e.extend(ee)
         return p, e
 
-    # Step 3: Perform trial division up to medium-sized primes.
+    # Step 4: Perform trial division up to medium-sized primes.
     pp, ee, n = trial_division(n, 10_000_000)
     p.extend(pp)
     e.extend(ee)
 
-    # Step 4: Use Pollard's rho algorithm to find a non-trivial factor.
+    # Step 5: Use Pollard's rho algorithm to find a non-trivial factor.
     while n > 1 and not is_prime(n):
         c = 1
         while True:

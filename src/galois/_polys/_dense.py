@@ -487,7 +487,7 @@ class roots_jit(Function):
         # Test if 0 is a root
         if nonzero_degrees[-1] != 0:
             roots.append(0)
-            powers.append(-1)
+            powers.append(np.iinfo(nonzero_coeffs.dtype).max)
 
         # Test if 1 is a root
         _sum = 0
